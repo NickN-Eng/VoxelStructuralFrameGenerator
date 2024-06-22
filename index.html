@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Voxel based structural frame generator with threejs</title>
     <link rel="stylesheet" href="src/style.css" />
+    <style>
+      html,
+      body {
+        height: 100%; /* Make html and body take up the full height */
+        margin: 0; /* Reset default margin */
+        padding: 0; /* Reset default padding */
+      }
+      body {
+        display: flex; /* Use flexbox to allow child elements to expand */
+        justify-content: center; /* Center children horizontally */
+        align-items: center; /* Center children vertically */
+      }
+      #HostGrid {
+        width: 100%; /* Make HostGrid take up the full width */
+        height: 100%; /* Make HostGrid take up the full height */
+      }
+    </style>
   </head>
 
   <body>
