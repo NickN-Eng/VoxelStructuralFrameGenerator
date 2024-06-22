@@ -1,0 +1,25 @@
+{
+  "name": "three-js-boilerplate-ts-vite",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy": "gh-pages -d ./dist"
+  },
+  "devDependencies": {
+    "@types/dat.gui": "^0.7.13",
+    "@types/three": "^0.163.0",
+    "dat.gui": "^0.7.9",
+    "gh-pages": "^6.1.1",
+    "three": "^0.163.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vite-plugin-top-level-await": "^1.4.1"
+  },
+  "dependencies": {
+    "@tweenjs/tween.js": "^23.1.2"
+  }
+}
