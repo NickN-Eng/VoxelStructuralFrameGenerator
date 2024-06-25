@@ -1,8 +1,61 @@
-body {
-  overflow: hidden;
-  margin: 0px;
+html, body {
+  height: 100%; /* Make html and body take up the full height */
+  margin: 0; /* Reset default margin */
+  padding: 0; /* Reset default padding */
+  overflow: hidden; /* Prevent scroll bars on the entire page */
 }
 
+iframe {
+  width: 100vw; /* Make iframe take up 100% of the viewport width */
+  height: 100vh; /* Make iframe take up 100% of the viewport height */
+  border: none; /* Remove default border */
+  display: block; /* Ensure iframe is a block-level element to fill width */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+#HostGrid {
+  width: 100%; /* Make HostGrid take up the full width */
+  height: 100%; /* Make HostGrid take up the full height */
+}
+
+.frameHeader{
+  font-family: Arial, sans-serif; /* Set font to Arial */
+
+  font-size: 30px; /* Set font size to 30px */
+  background: none; /* Remove background */
+  border: none; /* Remove border */
+  color: inherit; /* Use the current text color */
+  padding-top: 5px; /* Add padding to the top */
+  padding-bottom: 5px; /* Add padding to the bottom */
+  padding-right: 10px; /* Add padding to the right */
+  padding-left: 10px; /* Add padding to the left */
+  margin: 0; /* Remove margin */
+}
+
+.frameButton {
+  font-family: Arial, sans-serif; /* Set font to Arial */
+
+  font-size: 30px; /* Set font size to 30px */
+  background: none; /* Remove background */
+  border: none; /* Remove border */
+  color: inherit; /* Use the current text color */
+  padding-top: 5px; /* Add padding to the top */
+  padding-bottom: 5px; /* Add padding to the bottom */
+  padding-right: 10px; /* Add padding to the right */
+  padding-left: 10px; /* Add padding to the left */
+  margin: 0; /* Remove margin */
+}
+
+#navigation-panel {
+  text-align: right; /* Right-align all contents */
+  background-color:  #e8e8e8; 
+  border-bottom: 2px solid #ddd; /* Add a #ddd grey line at the bottom */
+  width: 100%; /* Make navigation-panel take up the full width */
+  display: flex; /* Enable flexbox */
+  flex-direction: row;
+  align-items: center; /* Align items vertically in the center */
+  justify-content:flex-start; /* Align items horizontally to the start */
+}
 
 .dg.main.taller-than-window .close-button {
   border-top: 1px solid #ddd !important; 

@@ -1,7 +1,14 @@
-import { defineConfig } from 'vite'
-import topLevelAwait from 'vite-plugin-top-level-await'
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [topLevelAwait()],
-  base: './',
-})
+  build: {
+    rollupOptions: {
+      input: {
+        main: "index.html",
+        rcframe: "RCFrame.html",
+        timberframe: "TimberFrame.html",
+        concrete: "Concrete.html",
+      },
+    },
+  },
+});

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voxel based timber frame generator</title>
+    <link rel="stylesheet" href="src/style.css" />
+  </head>
+  <body>
+    <grid id="HostGrid">
+      <script type="module">
+        import("/src/main.ts")
+          .then((module) => {
+            var frame = new module.RCFrame("HostGrid", true, true, 5);
+            frame.Regenerate();
+          })
+          .catch((error) => {
+            console.error("Module loading failed:", error);
+          });
+      </script>
+    </grid>
+  </body>
+</html>

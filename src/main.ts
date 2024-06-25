@@ -9,20 +9,21 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 export class FrameBase 
 {
   //True if regeneration should be animated (USER SETTING)
-  animateRegeneration: boolean = false;
+  public animateRegeneration: boolean = false;
 
   //True if regeneration should loop (USER SETTING)
-  regenerationLoop: boolean = false;
+  public regenerationLoop: boolean = false;
 
   //Interval between regenerations (USER SETTING)
-  regenerationInterval: number = 5;
+  public regenerationInterval: number = 5;
 
-  scene: THREE.Scene;
-  camera: THREE.PerspectiveCamera;
-  renderer: THREE.WebGLRenderer;
-  structureParentObj: THREE.Mesh;
-  baseParentObj: THREE.Mesh;
-  hostObj: THREE.Mesh;
+  //Scene objects
+  protected scene: THREE.Scene;
+  protected camera: THREE.PerspectiveCamera;
+  protected renderer: THREE.WebGLRenderer;
+  protected structureParentObj: THREE.Mesh;
+  protected baseParentObj: THREE.Mesh;
+  protected hostObj: THREE.Mesh;
 
   //stats: Stats;
 
@@ -63,6 +64,7 @@ export class FrameBase
     controls.enablePan = false;
     controls.maxPolarAngle = Math.PI / 2;
     controls.minPolarAngle = -Math.PI;
+    controls.enableZoom = false;
     
     //GEOMETRY
     const materialTransparentGreen = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.0 })
@@ -119,7 +121,7 @@ export class FrameBase
     //geometryFolder.open()
 
     const frameFolder = gui.addFolder('Total extents')
-    frameFolder.add(this, 'heightSize', 2, 10).step(1).name('Max Storeys')
+    frameFolder.add(this, 'heightSize', 2, 7).step(1).name('Max Storeys')
     frameFolder.add(this, 'widthSize', 2, 10).step(1).name('Max X Bays')
     frameFolder.add(this, 'depthSize', 2, 10).step(1).name('Max Y Bays')
     //frameFolder.open()
@@ -127,7 +129,7 @@ export class FrameBase
     const animationFolder = gui.addFolder('Animation Options');
     animationFolder.add(this, 'pauseRotation').name('Pause Rotation');
     animationFolder.add(this, 'regenerationLoop').name('Regen. Loop');
-    animationFolder.add(this, 'regenerationInterval', 1, 10).step(0.5).name('Regen. Delay');
+    animationFolder.add(this, 'regenerationInterval', 1, 7).step(0.5).name('Regen. Delay');
     animationFolder.add(this, 'animateRegeneration').name('Animate Regen.');
     //animationFolder.add(this.stats, 'showPanel').name('Toggle Stats');
     
@@ -137,29 +139,36 @@ export class FrameBase
     this.animate()
   }
 
-  widthSize = 5;
-  heightSize = 5;
-  depthSize = 5;
-  unitWidth = 7;
-  unitHeight = 3.5;
-  unitDepth = 7;
+  public widthSize = 5;
+  public heightSize = 5;
+  public depthSize = 5;
+  public unitWidth = 7;
+  public unitHeight = 3.5;
+  public unitDepth = 7;
 
-  pauseRotation = false;
+  //If this is false, the rotation animation will be paused
+  public pauseRotation = false;
 
-  isAnimating = false;
 
-  timeSinceLastRegeneration = 0;
+  //A flag to indicate if the frame is currently animating
+  //If it is, other requests to regenerate the frame will be ignored
+  protected isAnimating = false;
+
+  //The time since the last regeneration
+  //This is used to determine when to do the next regeneration
+  //if the regeneration loop is enabled
+  private timeSinceLastRegeneration = 0;
 
   //As per three.js coordinate system, x is width, y is height, z is depth
   //Each item represents a voxel in the frame, true if the voxel is filled, false if it is empty
-  voxelArray: Array<Array<Array<boolean>>> = [];
+  protected voxelArray: Array<Array<Array<boolean>>> = [];
 
   //Array of columns, Each column is a VERTICAL CORNER EDGE of a voxel
-  columnArray: Array<Array<Array<boolean>>> = [];
+  protected columnArray: Array<Array<Array<boolean>>> = [];
 
   //Array of beams along the width of the frame
-  beamAlongWidthArray: Array<Array<Array<boolean>>> = [];
-  beamAlongDepthArray: Array<Array<Array<boolean>>> = [];
+  protected beamAlongWidthArray: Array<Array<Array<boolean>>> = [];
+  protected beamAlongDepthArray: Array<Array<Array<boolean>>> = [];
 
   // Regenerate the frame, can be called by the UI
   TriggerRegeneration() {
@@ -171,7 +180,7 @@ export class FrameBase
 
   // Regenerate the frame
   // Can be called by the UI directly if animation is turned off
-  TriggerRegenerateWithoutAnimation() 
+  public TriggerRegenerateWithoutAnimation() 
   {
     if(this.isAnimating)
       return;
@@ -182,7 +191,7 @@ export class FrameBase
   }
 
   // Regenerate the frame (for internal processes)
-  Regenerate() 
+  private Regenerate() 
   {
     //Remove all children from the parent mesh
     this.RemoveChildren(this.structureParentObj);
@@ -206,29 +215,27 @@ export class FrameBase
     this.DrawStructure();
 
     this.CentreParentMesh();
-    this.AdjustCamera();
   }
 
-  Anim_Distance : number = 80;
-  Anim_Randomness : number = 100;
-  Anim_Leave_Duration_Stagger : number = 4000;
-  Anim_Leave_Duration_Moving : number = 500;
-  Anim_RegenerateLeave_Delay : number = this.Anim_Leave_Duration_Stagger + this.Anim_Leave_Duration_Moving + this.Anim_Randomness + 100;
-  Anim_Enter_Duration_Stagger : number = 4000;
-  Anim_Enter_Duration_Moving : number = 500;
-  Anim_RegenerateEnter_Delay : number = this.Anim_Enter_Duration_Stagger + this.Anim_Enter_Duration_Moving + this.Anim_Randomness + 100;
+  // Animation settings
+  private Anim_Distance : number = 100;
+  private Anim_Randomness : number = 100;
+  private Anim_Leave_Duration_Stagger : number = 5000; //the time difference between the first and last object to leave
+  private Anim_Leave_Duration_Moving : number = 500; //the time it takes for an object to move
+  private Anim_RegenerateLeave_Delay : number = this.Anim_Leave_Duration_Stagger + this.Anim_Leave_Duration_Moving + this.Anim_Randomness + 100;
+  private Anim_Enter_Duration_Stagger : number = 5000; //the time difference between the first and last object to enter
+  private Anim_Enter_Duration_Moving : number = 500; //the time it takes for an object to move
+  private Anim_RegenerateEnter_Delay : number = this.Anim_Enter_Duration_Stagger + this.Anim_Enter_Duration_Moving + this.Anim_Randomness + 100;
 
   // Regenerate the frame with an animation
   // Can be called by the UI directly if animation is turned on
-  TriggerRegerateWithAnimation() {
+  public TriggerRegerateWithAnimation() {
 
     // If the animation is already running, do nothing
     if(this.isAnimating)
       return;
     
     this.isAnimating = true;
-
-    // Leave animation
     const children = this.structureParentObj.children;
 
     // Calculate the centre of each object (yPos is the centre of the object in the y direction)
@@ -248,6 +255,7 @@ export class FrameBase
         boxMaxY = box.max.y;
     }
     
+    //Make each object leave
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       const initialPosition = child.position.clone();
@@ -269,7 +277,9 @@ export class FrameBase
     }, this.Anim_RegenerateLeave_Delay);
   }
 
-  RegenerateAndAnimateIn() {  
+  // Regenerate the frame and animate in
+  // Called after the leave animation is complete
+  private RegenerateAndAnimateIn() {  
 
     // Remove all children from the parent mesh
     this.Regenerate();
@@ -448,10 +458,11 @@ export class FrameBase
     // Override this method in child classes to define the specific drawing logic
   }
 
-  box: THREE.Box3 = new THREE.Box3();
-  center: THREE.Vector3 = new THREE.Vector3();
-  size: THREE.Vector3 = new THREE.Vector3();
+  protected box: THREE.Box3 = new THREE.Box3();
+  protected center: THREE.Vector3 = new THREE.Vector3();
+  protected size: THREE.Vector3 = new THREE.Vector3();
 
+  // Calculate the bounding box of the voxel array
   CalculateBoundingBox() {  
     // Calculate the bounding box of the parent mesh and its children
     this.box = new THREE.Box3();
@@ -474,21 +485,9 @@ export class FrameBase
 
   }
 
+  // Centre the parent mesh in the host mesh
+  // and adjust the camera position
   CentreParentMesh() {
-
-
-    // // Draw an axis through the centre of the bounding box
-    // let axisHelper = new THREE.Line( new THREE.BufferGeometry().setFromPoints( [new THREE.Vector3(center.x, -10, center.z), new THREE.Vector3(center.x, 10, center.z)] ), new THREE.LineBasicMaterial( { color: 0x0000ff } ) );
-    // parentObj.add(axisHelper);
-    
-    // DRAW BBOX
-    // const materialWire = new THREE.MeshNormalMaterial({ wireframe: true })
-    // let boxGeometry = new THREE.BoxGeometry(size.x, size.y, size.z);
-    // Move the BoxGeometry to the center of the Box3
-    // let boxCenter = box.getCenter(new THREE.Vector3());
-    // boxGeometry.translate(boxCenter.x, boxCenter.y, boxCenter.z);
-    // let boxMesh = new THREE.Mesh(boxGeometry, materialWire);
-    // this.parentObj.add(boxMesh);
 
     // Subtract the center of the bounding box from the position of the parent mesh
     this.structureParentObj.position.sub(this.center);
@@ -506,56 +505,10 @@ export class FrameBase
     this.camera.position.y = this.size.y;
     this.camera.lookAt(this.hostObj.position);
     
-    //this.AdjustCameraToBoundingBox(camera, box);
   }
 
-  // AdjustCameraToBoundingBox(camera: THREE.PerspectiveCamera, box: THREE.Box3) {
-  //   // Get the size of the bounding box
-  //   let size = box.getSize(new THREE.Vector3());
-  
-  //   // Get the maximum dimension of the bounding box
-  //   let maxDim = Math.max(size.x, size.y, size.z);
-  
-  //   // Get the aspect ratio of the camera
-  //   let aspect = camera.aspect;
-  
-  //   // Calculate the camera distance
-  //   let cameraDistance = maxDim / 2 / Math.tan(Math.PI * camera.fov / 360);
-  
-  //   // Get the center of the bounding box
-  //   let center = box.getCenter(new THREE.Vector3());
-  
-  //   // Set the camera position
-  //   camera.position.set(center.x, center.y, cameraDistance);
-  
-  //   // Set the camera to look at the center of the bounding box
-  //   camera.lookAt(center);
-  // }
-
-  AdjustCamera() {
-    // // Calculate the bounding box of the parent mesh and its children
-    // let box = new THREE.Box3().setFromObject(parentObj);
-
-    // // Get the size of the bounding box
-    // let size = box.getSize(new THREE.Vector3());
-
-    // // Get the center of the bounding box
-    // //let center = box.getCenter(new THREE.Vector3());
-
-    // // Get the maximum side of the bounding box (used to determine distance)
-    // let maxDim = Math.max(size.x, size.y, size.z);
-
-    // // Set the camera to look at the center of the bounding box
-    // //camera.lookAt(center);
-    // camera.lookAt(hostObj.position);
-
-    // // Set the camera to be at the maximum side of the bounding box
-    // const cameraZ = Math.max(maxDim / 2, 1.5);
-    // camera.position.z = cameraZ;
-  }
-
-  lastTime : number = 0;
-  timeDelta : number = 0;
+  private lastTime : number = 0;
+  private timeDelta : number = 0;
 
   //ANIMATE
   animate(time: number = 0) {
@@ -732,6 +685,7 @@ export class TimberFrame extends FrameBase {
   }
 }
 
+// How to use the frame
 // var frame = new RCFrame(true, true, 5000)
 // //var frame = new TimberFrame(true, true, 5000)
 // frame.Regenerate();

@@ -5,37 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Voxel based structural frame generator with threejs</title>
     <link rel="stylesheet" href="src/style.css" />
-    <style>
-      html,
-      body {
-        height: 100%; /* Make html and body take up the full height */
-        margin: 0; /* Reset default margin */
-        padding: 0; /* Reset default padding */
-      }
-      body {
-        display: flex; /* Use flexbox to allow child elements to expand */
-        justify-content: center; /* Center children horizontally */
-        align-items: center; /* Center children vertically */
-      }
-      #HostGrid {
-        width: 100%; /* Make HostGrid take up the full width */
-        height: 100%; /* Make HostGrid take up the full height */
-      }
-    </style>
   </head>
-
   <body>
-    <grid id="HostGrid">
-      <script type="module">
-        import("/src/main.ts")
-          .then((module) => {
-            var frame = new module.TimberFrame("HostGrid", true, true, 5);
-            frame.Regenerate();
-          })
-          .catch((error) => {
-            console.error("Module loading failed:", error);
-          });
-      </script>
-    </grid>
+    <div id="navigation-panel">
+      <h1 class="frameHeader">structural frame generator</h1>
+      <button class="frameButton" onclick="location.href='Timber.html';">
+        <u>timber</u>
+      </button>
+      <button class="frameButton" onclick="location.href='Concrete.html';">
+        concrete
+      </button>
+    </div>
+    <iframe src="TimberFrame.html"></iframe>
   </body>
 </html>
