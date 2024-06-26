@@ -66,11 +66,10 @@ export class FrameBase
     controls.minPolarAngle = -Math.PI;
     controls.enableZoom = false;
     
-    //GEOMETRY
-    const materialTransparentGreen = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.0 })
-    const materialTransparentRed = new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.0 })
+    //DEBUG GEOMETRY
+    const materialTransparentGreen = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.0 }) //set to 0.5 opacity for debugging
+    const materialTransparentRed = new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.0 }) //set to 0.5 opacity for debugging
 
-    
     // const parentGeometry = new THREE.BoxGeometry(parentSize.width, parentSize.height,parentSize.depth)
     const parentGeometry = new THREE.BoxGeometry(0.1,10,0.1)
     
@@ -218,14 +217,14 @@ export class FrameBase
   }
 
   // Animation settings
-  private Anim_Distance : number = 100;
-  private Anim_Randomness : number = 100;
-  private Anim_Leave_Duration_Stagger : number = 5000; //the time difference between the first and last object to leave
-  private Anim_Leave_Duration_Moving : number = 500; //the time it takes for an object to move
-  private Anim_RegenerateLeave_Delay : number = this.Anim_Leave_Duration_Stagger + this.Anim_Leave_Duration_Moving + this.Anim_Randomness + 100;
-  private Anim_Enter_Duration_Stagger : number = 5000; //the time difference between the first and last object to enter
-  private Anim_Enter_Duration_Moving : number = 500; //the time it takes for an object to move
-  private Anim_RegenerateEnter_Delay : number = this.Anim_Enter_Duration_Stagger + this.Anim_Enter_Duration_Moving + this.Anim_Randomness + 100;
+  private Anim_Distance() : number { return 100;}
+  private Anim_Randomness() : number { return 100;}
+  private Anim_Leave_Duration_Stagger() : number { return this.heightSize * 1000;} //the time difference between the first and last object to leave
+  private Anim_Leave_Duration_Moving() : number { return  500;} //the time it takes for an object to move
+  private Anim_RegenerateLeave_Delay() : number { return this.Anim_Leave_Duration_Stagger() + this.Anim_Leave_Duration_Moving() + this.Anim_Randomness() + 100; }
+  private Anim_Enter_Duration_Stagger() : number { return this.heightSize * 1000; }//the time difference between the first and last object to enter
+  private Anim_Enter_Duration_Moving() : number { return 500; }//the time it takes for an object to move
+  private Anim_RegenerateEnter_Delay() : number { return this.Anim_Enter_Duration_Stagger() + this.Anim_Enter_Duration_Moving() + this.Anim_Randomness() + 100; }
 
   // Regenerate the frame with an animation
   // Can be called by the UI directly if animation is turned on
@@ -261,20 +260,20 @@ export class FrameBase
       const initialPosition = child.position.clone();
       const yPos = yPosArray[i];
 
-      const randomValue = Math.random() * this.Anim_Randomness;
-      const delay = (boxMaxY - yPos) / (boxMaxY - boxMinY) * this.Anim_Leave_Duration_Stagger + randomValue;
+      const randomValue = Math.random() * this.Anim_Randomness();
+      const delay = (boxMaxY - yPos) / (boxMaxY - boxMinY) * this.Anim_Leave_Duration_Stagger() + randomValue;
 
-      const targetPosition = new THREE.Vector3(initialPosition.x, initialPosition.y + this.Anim_Distance, initialPosition.z);
+      const targetPosition = new THREE.Vector3(initialPosition.x, initialPosition.y + this.Anim_Distance(), initialPosition.z);
       new TWEEN.Tween(child.position)
         .delay(delay)
-        .to(targetPosition, this.Anim_Leave_Duration_Moving)
+        .to(targetPosition, this.Anim_Leave_Duration_Moving())
         .easing(TWEEN.Easing.Quadratic.InOut)
         .start()
     }
 
     setTimeout(() => {
       this.RegenerateAndAnimateIn();
-    }, this.Anim_RegenerateLeave_Delay);
+    }, this.Anim_RegenerateLeave_Delay());
   }
 
   // Regenerate the frame and animate in
@@ -308,22 +307,22 @@ export class FrameBase
       const child = children[i];
       const desiredPosition = child.position.clone();
       const yPos = yPosArray[i];
-      const randomValue = Math.random() * this.Anim_Randomness;
-      const delay = (yPos - boxMinY) / (boxMaxY - boxMinY) * this.Anim_Enter_Duration_Stagger + randomValue;
+      const randomValue = Math.random() * this.Anim_Randomness();
+      const delay = (yPos - boxMinY) / (boxMaxY - boxMinY) * this.Anim_Enter_Duration_Stagger() + randomValue;
       
       //Set pre-motion position
-      child.position.set(desiredPosition.x, desiredPosition.y + this.Anim_Distance, desiredPosition.z);
+      child.position.set(desiredPosition.x, desiredPosition.y + this.Anim_Distance(), desiredPosition.z);
 
       new TWEEN.Tween(child.position)
         .delay(delay)
-        .to(desiredPosition, this.Anim_Enter_Duration_Moving)
+        .to(desiredPosition, this.Anim_Enter_Duration_Moving())
         .easing(TWEEN.Easing.Quadratic.InOut)
         .start()
     }
 
     setTimeout(() => {
       this.RegenerateComplete();
-    }, this.Anim_RegenerateEnter_Delay);
+    }, this.Anim_RegenerateEnter_Delay());
 
   }
 
@@ -686,6 +685,6 @@ export class TimberFrame extends FrameBase {
 }
 
 // How to use the frame
-// var frame = new RCFrame(true, true, 5000)
-// //var frame = new TimberFrame(true, true, 5000)
+// var frame = new RCFrame("elementId")
+// var frame = new TimberFrame("elementId")
 // frame.Regenerate();
