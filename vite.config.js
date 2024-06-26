@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  base: "./", // This sets the base path to the current directory for all assets
   build: {
     rollupOptions: {
       input: {
