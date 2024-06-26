@@ -17,6 +17,9 @@ export class FrameBase
   //Interval between regenerations (USER SETTING)
   public regenerationInterval: number = 5;
 
+  //Show DAT.GUI (USER SETTING) - cannot be 
+  readonly showGUI: boolean = true;
+
   //Scene objects
   protected scene: THREE.Scene;
   protected camera: THREE.PerspectiveCamera;
@@ -27,11 +30,12 @@ export class FrameBase
 
   //stats: Stats;
 
-  constructor(hostId : string, animateRegeneration: boolean = false, regenerationLoop: boolean = false, regenerationInterval: number = 5) {
+  constructor(hostId : string, animateRegeneration: boolean = false, regenerationLoop: boolean = false, regenerationInterval: number = 5, showGUI: boolean = true) {
 
     this.animateRegeneration = animateRegeneration;
     this.regenerationLoop = regenerationLoop;
     this.regenerationInterval = regenerationInterval;
+    this.showGUI = showGUI;
 
     this.scene = new THREE.Scene()
 
@@ -111,6 +115,14 @@ export class FrameBase
     //document.body.appendChild(this.stats.dom)
 
     //DAT.GUI
+    if(this.showGUI)
+      this.SetupGUI();
+
+    this.animate()
+  }
+
+  SetupGUI() {
+
     const gui = new GUI()
 
     const geometryFolder = gui.addFolder('Bay size')
@@ -134,8 +146,6 @@ export class FrameBase
     
     gui.add({ click: this.TriggerRegeneration.bind(this) }, 'click').name('Trigger Regeneration');
     gui.close();
-
-    this.animate()
   }
 
   public widthSize = 5;
@@ -267,7 +277,7 @@ export class FrameBase
       new TWEEN.Tween(child.position)
         .delay(delay)
         .to(targetPosition, this.Anim_Leave_Duration_Moving())
-        .easing(TWEEN.Easing.Quadratic.InOut)
+        .easing(TWEEN.Easing.Elastic.InOut)
         .start()
     }
 

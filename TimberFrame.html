@@ -11,7 +11,7 @@
       <script type="module">
         import("/src/main.ts")
           .then((module) => {
-            var frame = new module.TimberFrame("HostGrid", true, true, 5);
+            var frame = new module.TimberFrame("HostGrid", true, true, 5, true);
             frame.Regenerate();
           })
           .catch((error) => {
